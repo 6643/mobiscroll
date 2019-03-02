@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+
+    <link rel="stylesheet" href="css/mobiscroll.javascript.min.css">
+    <script src="js/mobiscroll.javascript.min.js"></script>
+
+    <script>
+        mobiscroll.settings = { lang: 'zh' };
+    </script>
+
+
+</head>
+
+<body>
+
+    <input id="demo" placeholder="Please Select..." />
+
+
+
+
+
+    <script src="citys.js"></script>
+    <script>
+
+        var instance,
+            units = ['oz', 'g', 'serving'],
+            prevUnit = 'oz',
+            wheel = [
+                [{
+                    circular: false,
+                    data: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+                }, {
+                    circular: false,
+                    data: ['-', '1/4', '1/2', '3/4']
+                }, {
+                    circular: false,
+                    data: units
+                }]
+            ];
+
+        instance = mobiscroll.scroller('#demo', {
+            lang: 'zh',
+            wheels: wheel,
+            validate: function (event, inst) {
+                var i,
+                    mult = 1,
+                    index = event.index,
+                    currUnit = event.values[2],
+                    disabled = [];
+
+                if (currUnit == 'g' && (prevUnit == 'oz' || prevUnit == 'serving')) {
+                    mult = 28;
+                } else if ((currUnit != 'oz' || currUnit != 'serving') && prevUnit == 'g') {
+                    mult = 1 / 28;
+                }
+
+                if (currUnit != 'serving') {
+                    disabled.push('1/4', '1/2', '3333/4');
+                }
+
+                if (index == 2 && currUnit != prevUnit) {
+                    for (i = 0; i < wheel[0][0].data.length; ++i) {
+                        wheel[0][0].data[i] = Math.round(wheel[0][0].data[i] * mult);
+                    }
+
+                    inst.settings.wheels = wheel;
+                    inst._tempWheelArray[0] = inst._tempWheelArray[0] * mult;
+                    inst.changeWheel({
+                        0: wheel[0][0]
+                    });
+
+                    prevUnit = currUnit;
+                }
+
+                return {
+                    disabled: [
+                        [], disabled, []
+                    ]
+                }
+            },
+            parseValue: function (val) {
+                var hasUnit;
+
+                if (val) {
+                    val = val.toString().split(' ');
+                    hasUnit = units.indexOf(val[1]) !== -1;
+                    return [val[0], (hasUnit ? '' : val[1].replace('-', '')), (hasUnit ? val[1] : val[2])];
+                }
+
+                return [0, '-', 'oz'];
+            },
+            formatValue: function (data) {
+                return (data[2] == 'serving' && data[0] == 0 && data[1] ? '' : data[0]) + (data[1] ? ' ' + data[1].replace('-', '') : '') + ' ' + data[2];
+            }
+        });
+    </script>
+
+</body>
+
+</html>
