@@ -22,10 +22,6 @@ jobs:
       - name: Run trace
         run: go run trace.go
 
-      - name: Run openai app
-        working-directory: ./openai
-        run: go run .
-
       # ===== 新增：自动更新 README.md 时间戳 =====
       - name: Update timestamp in README.md
         if: github.event_name == 'schedule'   # 只在定时任务中执行
