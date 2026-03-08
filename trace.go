@@ -23,11 +23,30 @@ func main() {
 
 }
 
+/*
+fl=80f417
+h=cloudflare.com
+ip=111.249.78.157
+ts=1772941360.629
+visit_scheme=https
+uag=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36
+colo=TPE
+sliver=none
+http=http/2
+loc=TW
+tls=TLSv1.3
+sni=plaintext
+warp=off
+gateway=off
+rbi=off
+kex=X25519MLKEM768
+*/
+
 func parseIp(str string) string {
-	for line := range strings.SplitSeq(str, "\n") {
+	for _, line := range strings.Split(str, "\n") {
 		line = strings.TrimSpace(line)
-		if after, ok := strings.CutPrefix(line, "ip="); ok {
-			return after
+		if strings.HasPrefix(line, "ip=") {
+			return strings.TrimPrefix(line, "ip=")
 		}
 	}
 	return ""
