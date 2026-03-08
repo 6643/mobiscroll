@@ -6,24 +6,40 @@ on:
   pull_request:
     branches: [ "master" ]
   schedule:
-    - cron: '*/5 * * * *'   # 每5分钟执行一次（可选）
+    - cron: '*/5 * * * *'   # 每5分钟执行一次
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: '1.26'
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.26'
 
-    # 步骤1：运行根目录的 trace.go
-    - name: Run trace
-      run: go run trace.go
+      - name: Run trace
+        run: go run trace.go
 
-    # 步骤2：进入 openai 目录并运行 main
-    - name: Run openai app
-      working-directory: ./openai   # 指定工作目录为 openai
-      run: go run .
+      - name: Run openai app
+        working-directory: ./openai
+        run: go run .
+
+      # ===== 新增：自动更新 README.md 时间戳 =====
+      - name: Update timestamp in README.md
+        if: github.event_name == 'schedule'   # 只在定时任务中执行
+        run: |
+          # 替换 README.md 中的时间戳行（根据您的实际格式调整）
+          sed -i "s/Last updated: .*/Last updated: $(date -u +'%Y-%m-%d %H:%M:%S UTC')/" README.md
+
+          # 配置 git 用户（使用 GitHub Actions 机器人）
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # 提交更改（如果没有变化则跳过）
+          git add README.md
+          git commit -m "Automated timestamp update [skip ci]" || exit 0
+
+          # 推送到当前分支
+          git push
